@@ -1,0 +1,43 @@
+version: '3.8'
+
+networks:
+  proxy:
+    external: true 
+
+volumes:
+  data:
+
+services:
+  alloy:
+    image: grafana/alloy:latest
+    container_name: alloy 
+    # hostname: otelcol
+    restart: unless-stopped
+    ports:
+      - "12345:12345" # Map port 12345
+      # - 4318:4318
+      # - 4317:4317
+    networks:
+      - proxy
+    environment:
+      - HOSTNAME=alloy-desktop
+      # - TLS_CERT_FILE_PATH=/certs/cert.pem
+      # - TLS_KEY_FILE_PATH=/certs/cert.key
+    volumes:
+      - //var/run/docker.sock://var/run/docker.sock:ro # access to docker deamon
+      - ./config-to-alloy:/etc/alloy
+      # - ./certs:/certs   # https certs
+      - data:/var/lib/alloy/data
+      - /var/log:/var/log:ro    # access to system logs
+    command: >
+      run
+      --server.http.listen-addr=0.0.0.0:12345
+      --storage.path=/var/lib/alloy/data
+      /etc/alloy
+    labels:
+    - "alloy.logs.enable=true"
+
+
+
+
+  
