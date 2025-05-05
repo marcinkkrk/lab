@@ -48,3 +48,17 @@ services:
       - "4318:4318"
     depends_on:
       - tempo
+  
+  grafana:
+    image: grafana/grafana:latest
+    volumes:
+      - ./shared/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./shared/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./shared/grafana/dashboards:/var/lib/grafana/dashboards
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=false
+      - GF_HTTP_TLS_SKIP_VERIFY=true
+    ports:
+      - "3000:3000"
