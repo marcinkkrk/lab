@@ -28,3 +28,23 @@ services:
       - "3100:3100"
     command:
       - "-config.file=/etc/loki/local-config.yaml"
+  
+  promtail:
+    image: grafana/promtail:latest
+    depends_on:
+      - loki
+    volumes:
+      - ./shared/logs:/var/log
+      - ./shared/promtail:/etc/promtail
+    command:
+      - "-config.file=/etc/promtail/config.yml"
+  
+  alloy:
+    image: grafana/alloy:latest
+    volumes:
+      - ./shared/alloy:/etc/alloy
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    depends_on:
+      - tempo
