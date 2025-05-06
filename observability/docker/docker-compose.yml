@@ -9,6 +9,7 @@ services:
       - "3200:3200"
     command: ["-config.file=/etc/tempo.yml"]
 
+
   prometheus:
     image: prom/prometheus:latest
     volumes:
@@ -18,7 +19,7 @@ services:
     command: 
       - "--web.enable-remote-write-receiver" 
       - "--config.file=/etc/prometheus/prometheus.yml"
-  
+
   loki:
     image: grafana/loki:latest
     volumes:
@@ -28,7 +29,7 @@ services:
       - "3100:3100"
     command:
       - "-config.file=/etc/loki/local-config.yaml"
-  
+
   promtail:
     image: grafana/promtail:latest
     depends_on:
@@ -38,7 +39,7 @@ services:
       - ./shared/promtail:/etc/promtail
     command:
       - "-config.file=/etc/promtail/config.yml"
-  
+
   alloy:
     image: grafana/alloy:latest
     volumes:
@@ -48,7 +49,7 @@ services:
       - "4318:4318"
     depends_on:
       - tempo
-  
+
   grafana:
     image: grafana/grafana:latest
     volumes:
@@ -62,3 +63,41 @@ services:
       - GF_HTTP_TLS_SKIP_VERIFY=true
     ports:
       - "3000:3000"
+
+  shoehub:
+    image: aussiearef/shoehub
+    ports:
+      - "8001:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - LOG_PATH=/app/logs/log.txt
+    volumes:
+    - ./shared/logs/shoehub:/app/logs:rw
+    depends_on:
+      - loki
+      - prometheus
+
+  orderservice:
+    image: aussiearef/orderservice
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    depends_on:
+      - paymentservice
+      - alloy
+
+  paymentservice:
+    image: aussiearef/paymentservice
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    depends_on:
+      - alloy
+
+  stimulator:
+    image: aussiearef/stimulator
+    depends_on:
+      - orderservice
+      - paymentservice
+      
+volumes:
+  prometheus-data:
+  tempo-data:
