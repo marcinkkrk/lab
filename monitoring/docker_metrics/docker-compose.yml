@@ -1,0 +1,39 @@
+services:
+  prometheus:
+        image: prom/prometheus:v3.3.1
+        container_name: prometheus
+        ports:
+            - 9090:9090
+        command: 
+            - "--web.enable-remote-write-receiver" 
+            - "--config.file=/etc/prometheus/prometheus.yml"
+        volumes:
+            - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+  cadvisor:
+        image: gcr.io/cadvisor/cadvisor:latest
+        container_name: cadvisor
+        ports:
+        - "8089:8080"
+        volumes:
+        - /:/rootfs:ro
+        - /var/run:/var/run:ro
+        - /sys:/sys:ro
+        - /var/lib/docker/:/var/lib/docker:ro
+        - /var/run/docker.sock:/var/run/docker.sock:ro
+        restart: always
+  grafana:
+        image: grafana/grafana:11.6.0
+        container_name: grafana
+        ports:
+            - '3000:3000'
+        environment:
+            - GF_SECURITY_ADMIN_USER=admin
+            - GF_SECURITY_ADMIN_PASSWORD=admin
+        volumes:
+            - grafana_data:/var/lib/grafana
+            - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+            - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+            - ./grafana/dashboards:/etc/grafana/dashboards
+
+volumes:
+    grafana_data:
