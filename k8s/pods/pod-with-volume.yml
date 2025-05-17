@@ -2,6 +2,7 @@ apiVersion: v1
 kind: Pod 
 metadata:
   labels:
+      run: nginx
   name: nginx-storage
 spec: 
   containers:
@@ -10,6 +11,7 @@ spec:
       volumeMounts:
         - mountPath: /scratch    # Volume location in container
           name: scratch-volume
+          
     - image: busybox 
       name: busybox
       command: ["/bin/sh", "-c"]
