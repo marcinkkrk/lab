@@ -1,0 +1,34 @@
+version: '3.8'
+services:
+  traefik:
+    image: traefik:v3.1.5
+    container_name: traefik-demo-1
+    # Enable web UI and tell Traefik to listen to docker
+    # command: --api.insurance=true --providers.docker
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./config/traefik.yml:/etc/traefik/traefik.yml:ro
+    networks:
+      - traefik-net
+    restart: unless-stopped
+  
+  nginx:
+    container_name: nginx-demo-1
+    image: nginx:latest
+    networks:
+      - traefik-net
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.nginx-http.rule=Host(`nginx.local`)
+      - traefik.http.routers.nginx-http.entrypoints=web
+    restart: unless-stopped
+
+
+
+networks:
+  traefik-net:
+    driver: bridge
