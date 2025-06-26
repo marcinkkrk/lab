@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  traefik:
+    image: traefik:v3.4
+    # command: 
+    #   - "--api.insecure=true" # serve dashboard
+    #   - "--providers.docker=true"
+    #   - "--entrypoints.web.address=:80"
+    ports:      # Expose ports
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # mount docker socket
+      - ./config/traefik.yml:/etc/traefik/traefik.yml:ro
+
+
+  whoami:
+    image: traefik/whoami
+    labels:
+      - traefik.enable=true
+      - "traefik.http.routers.whoami.rule=Host(`whoami.localhost`)"
