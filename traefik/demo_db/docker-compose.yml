@@ -1,16 +1,46 @@
 version: "3.8"
 
 services:
+  traefik:
+    image: traefik:v3.1.5
+    container_name: traefik
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # mount docker socket
+      - ./traefik.yml:/etc/traefik/traefik.yml:ro
+      # - ./certs:/certs:ro
+    networks:
+      - internal
+      - external
+
   web:
     build: .
-    ports:
-      - "8000:8000"
+    container_name: backend
+    # ports:
+      # - "8000:8000"
     depends_on:
       - db
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/carsdb
       - PYTHONPATH=/app
-      
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.backend.rule=Host(`backend.localhost`)
+
+      # - traefik.http.routers.backend.entrypoints=websecure
+      # - traefik.http.routers.backend.tls=true
+
+      # - traefik.http.routers.backend.tls.certresolver=static
+      # - traefik.http.routers.backend.tls.domains[0].main=backend.localhost
+
+      - traefik.http.services.web.loadbalancer.server.port=8000
+      # Trefik redirects traffic to port 8000 using docker network
+      # Its safer because its not visible from outside (only from traefik)
+    networks:
+      - internal
 
   db:
     image: postgres:15
@@ -20,6 +50,19 @@ services:
       POSTGRES_DB: carsdb
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - internal
 
 volumes:
   postgres_data:
+
+networks:
+  internal:
+    internal: true
+
+  external:
+
+
+# Containers can talk with eachothers
+# Containers cannot get packages from internet (no connection)
+# Network is isolated

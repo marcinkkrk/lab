@@ -1,0 +1,18 @@
+api:
+  insecure: true # dashboard reachable on port 8080 without auth
+entryPoints:
+  web: 
+    address: ":80"
+  websecure:
+    address: ":443"
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+
+# tls:
+#   stores:
+#     default:
+#       defaultCertificate:
+#         certFile: /certs/selfsigned.crt
+#         keyFile: /certs/selfsigned.key
