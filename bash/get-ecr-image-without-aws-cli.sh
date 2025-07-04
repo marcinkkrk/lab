@@ -3,6 +3,7 @@
 AWS_REGION=""
 AWS_ACCESS_KEY=""
 AWS_SECRET_KEY=""
+AWS_ACCOUNT_ID=""
 
 DATE="$(date -u "+%Y%m%dT%H%M%SZ")"
 DATE_SHORT="$(date -u "+%Y%m%d")"
@@ -64,11 +65,4 @@ TOKEN=$(echo "$TOKEN_BASE64" | base64 --decode | cut -d: -f2)
 # Extract the ECR registry URL
 ECR_REGISTRY=$(echo $TOKEN_RESPONSE | jq -r '.authorizationData[0].proxyEndpoint')
 
-# Output ready-to-use login command
-echo "Use the following token to authenticate with Docker:"
-echo $TOKEN
-
-
-
-
-# echo 'your-decoded-token' | docker login --username AWS --password-stdin 804346556953.dkr.ecr.eu-west-1.amazonaws.com
+echo $TOKEN | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.eu-west-1.amazonaws.com
